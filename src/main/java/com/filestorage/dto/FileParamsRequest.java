@@ -9,7 +9,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class FileParams {
+public class FileParamsRequest {
     private String name;
     private int size;
 }
