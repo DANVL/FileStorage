@@ -12,8 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @Slf4j
@@ -58,10 +60,15 @@ public class FileServiceImpl implements FileService {
     public void addTags(String id, List<String> tags) throws NoSuchElementException {
         Optional<File> file = fileRepository.findById(id);
 
-
         if (file.isPresent()) {
             File edited = file.get();
-            edited.addTags(tags);
+            Set<String> newTags = edited.getTags();
+
+            if(newTags == null)
+                newTags = new HashSet<>();
+
+            newTags.addAll(tags);
+            edited.setTags(newTags);
 
             fileRepository.save(edited);
 
@@ -79,8 +86,12 @@ public class FileServiceImpl implements FileService {
 
         if (file.isPresent()) {
             File edited = file.get();
+            Set<String> newTags = edited.getTags();
 
-            if (edited.removeTags(tags)) {
+            if (newTags.containsAll(tags)) {
+                newTags.removeAll(tags);
+                edited.setTags(newTags);
+
                 fileRepository.save(edited);
 
                 log.info("Tags removed");
@@ -96,9 +107,9 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public Iterable<File> getFiles(int page, int size, List<String> tags) {
-        Iterable<File> result = fileRepository.findAll(PageRequest.of(page, size))
-                .filter(f -> f.getTags().containsAll(tags));
+    public List<File> getFiles(int page, int size, List<String> tags) {
+        List<File> result = fileRepository.findAll(PageRequest.of(page, size))
+                .filter(f -> f.getTags().containsAll(tags)).toList();
 
         log.info("found " + Iterables.size(result) + " files");
 
@@ -106,8 +117,8 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public Iterable<File> getFiles(int page, int size) {
-        Iterable<File> result = fileRepository.findAll(PageRequest.of(page, size));
+    public List<File> getFiles(int page, int size) {
+        List<File> result = fileRepository.findAll(PageRequest.of(page, size)).getContent();
 
         log.info("found " + Iterables.size(result) + " files");
 

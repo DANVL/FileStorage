@@ -14,7 +14,7 @@ public interface FileService {
     void deleteFile(String id) throws NoSuchElementException;
     void addTags(String id, List<String> tags) throws NoSuchElementException;
     void removeTags(String id, List<String> tags) throws NoSuchElementException, NoSuchTagsException;
-    Iterable<File> getFiles(int page,int size, List<String> tags);
-    Iterable<File> getFiles(int page,int size);
+    List<File> getFiles(int page,int size, List<String> tags);
+    List<File> getFiles(int page,int size);
 
 }

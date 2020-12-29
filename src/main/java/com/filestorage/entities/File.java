@@ -1,11 +1,10 @@
 package com.filestorage.entities;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import java.util.List;
 import java.util.Set;
@@ -15,23 +14,20 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Getter
+@Setter
 public class File {
 
     @Id
     private String id;
+
+    @Field(type = FieldType.Keyword)
     private String name;
+
+    @Field(type = FieldType.Keyword)
     private int size;
+
+    @Field(type = FieldType.Keyword)
     private Set<String> tags;
 
-    public void addTags(List<String> tags){
-        this.tags.addAll(tags);
-    }
-
-    public boolean removeTags(List<String> tags){
-        if(this.tags.containsAll(tags)){
-            return this.tags.removeAll(tags);
-        }
-
-        return false;
-    }
 }
