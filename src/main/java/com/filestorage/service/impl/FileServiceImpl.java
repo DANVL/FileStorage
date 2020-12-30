@@ -6,6 +6,7 @@ import com.filestorage.exceptions.NoSuchElementException;
 import com.filestorage.exceptions.NoSuchTagsException;
 import com.filestorage.repository.FileRepository;
 import com.filestorage.service.FileService;
+import com.filestorage.utils.FileTagUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -34,6 +35,9 @@ public class FileServiceImpl implements FileService {
             log.error("File with wrong size found");
             throw new InvalidSizeException("Wrong size of " + size + " found");
         }
+
+        file.addTag(FileTagUtils.tagByFileName(file.getName()));
+
         file = fileRepository.save(file);
 
         log.info("New file saved");
@@ -118,11 +122,8 @@ public class FileServiceImpl implements FileService {
                     .findAllByNameLike(name, PageRequest.of(page, size));
         }
 
-
         log.info("found " + result.size() + " files");
 
         return result;
     }
-
-
 }

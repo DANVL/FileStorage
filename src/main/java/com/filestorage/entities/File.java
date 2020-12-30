@@ -30,4 +30,8 @@ public class File {
     @Field(type = FieldType.Keyword)
     private Set<String> tags;
 
+    public void addTag(String tag){
+        tags.add(tag);
+    }
+
 }
