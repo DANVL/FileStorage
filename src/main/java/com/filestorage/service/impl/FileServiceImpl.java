@@ -4,6 +4,7 @@ import com.filestorage.entities.File;
 import com.filestorage.exceptions.InvalidSizeException;
 import com.filestorage.exceptions.NoSuchElementException;
 import com.filestorage.exceptions.NoSuchTagsException;
+import com.filestorage.exceptions.NullNameException;
 import com.filestorage.repository.FileRepository;
 import com.filestorage.service.FileService;
 import com.filestorage.utils.FileTagUtils;
@@ -29,11 +30,15 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public String saveFile(File file) throws InvalidSizeException {
+    public String saveFile(File file) throws InvalidSizeException, NullNameException {
         int size = file.getSize();
         if (size <= 0) {
             log.error("File with wrong size found");
             throw new InvalidSizeException("Wrong size of " + size + " found");
+        }
+
+        if(file.getName() == null){
+            throw new NullNameException("Name cannot be null");
         }
 
         file.addTag(FileTagUtils.tagByFileName(file.getName()));

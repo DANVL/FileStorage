@@ -4,11 +4,12 @@ import com.filestorage.entities.File;
 import com.filestorage.exceptions.InvalidSizeException;
 import com.filestorage.exceptions.NoSuchElementException;
 import com.filestorage.exceptions.NoSuchTagsException;
+import com.filestorage.exceptions.NullNameException;
 
 import java.util.List;
 
 public interface FileService {
-    String saveFile(File file) throws InvalidSizeException;
+    String saveFile(File file) throws InvalidSizeException, NullNameException;
 
     void deleteFile(String id) throws NoSuchElementException;
 

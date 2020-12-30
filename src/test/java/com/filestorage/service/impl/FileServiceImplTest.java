@@ -4,6 +4,7 @@ import com.filestorage.entities.File;
 import com.filestorage.exceptions.InvalidSizeException;
 import com.filestorage.exceptions.NoSuchElementException;
 import com.filestorage.exceptions.NoSuchTagsException;
+import com.filestorage.exceptions.NullNameException;
 import com.filestorage.repository.FileRepository;
 import com.filestorage.service.FileService;
 import org.junit.Test;
@@ -30,7 +31,7 @@ public class FileServiceImplTest {
     FileRepository fileRepository;
 
     @Test
-    public void saveFile() throws InvalidSizeException {
+    public void saveFile() throws InvalidSizeException, NullNameException {
 
         File file = File.builder().size(5).name("video.mp4").tags(new HashSet<>()).build();
 
@@ -47,8 +48,15 @@ public class FileServiceImplTest {
     }
 
     @Test(expected = InvalidSizeException.class)
-    public void saveFileWrongSize() throws InvalidSizeException {
+    public void saveFileWrongSize() throws InvalidSizeException, NullNameException {
         File file = File.builder().size(-5).name("aa").build();
+
+        fileService.saveFile(file);
+    }
+
+    @Test(expected = NullNameException.class)
+    public void saveFileNullName() throws InvalidSizeException, NullNameException {
+        File file = File.builder().size(5).build();
 
         fileService.saveFile(file);
     }
