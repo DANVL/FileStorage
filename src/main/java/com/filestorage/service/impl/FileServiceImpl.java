@@ -105,10 +105,29 @@ public class FileServiceImpl implements FileService {
         }
     }
 
-    @Override
+    /*@Override
     public List<File> getFiles(int page, int size, List<String> tags) {
         List<File> result = fileRepository.findAll(PageRequest.of(page, size))
                 .filter(f -> f.getTags().containsAll(tags)).toList();
+
+        log.info("found " + result.size() + " files");
+
+        return result;
+    }
+
+    @Override
+    public List<File> getFiles(int page, int size) {
+        List<File> result = fileRepository.findAll(PageRequest.of(page, size)).getContent();
+
+        log.info("found " + result.size() + " files");
+
+        return result;
+    }*/
+
+
+    @Override
+    public List<File> getFiles(int page, int size, List<String> tags) {
+        List<File> result = fileRepository.findAllByTags(new HashSet<>(tags), PageRequest.of(page, size));
 
         log.info("found " + result.size() + " files");
 
