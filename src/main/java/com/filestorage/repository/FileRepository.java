@@ -8,5 +8,6 @@ import java.util.List;
 import java.util.Set;
 
 public interface FileRepository extends ElasticsearchRepository<File,String> {
-    List<File> findAllByTags(Set<String> tags, Pageable pageable);
+    List<File> findAllByNameLikeAndTags(String name, Set<String> tags, Pageable pageable);
+    List<File> findAllByNameLike(String name, Pageable pageable);
 }

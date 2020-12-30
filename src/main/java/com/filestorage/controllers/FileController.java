@@ -90,17 +90,12 @@ public class FileController {
     @GetMapping
     public ResponseEntity<?> getAll(@RequestParam(defaultValue = "0", required = false) int page,
                                     @RequestParam(defaultValue = "10", required = false) int size,
-                                    @RequestParam(required = false) String[] tags) {
+                                    @RequestParam(required = false) String[] tags,
+                                    @RequestParam(defaultValue = "", required = false) String q) {
         ListFilesResponse result = new ListFilesResponse();
 
-        if (tags != null) {
-            result.setPage(fileService.getFiles(page, size, Arrays.asList(tags)));
-            result.setTotal(result.getPage().size());
-        } else {
-            result.setPage(fileService.getFiles(page, size));
-            result.setTotal(result.getPage().size());
-        }
-
+        result.setPage(fileService.getFiles(page, size, q, tags));
+        result.setTotal(result.getPage().size());
 
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
