@@ -7,7 +7,6 @@ import com.filestorage.exceptions.NoSuchTagsException;
 import com.filestorage.repository.FileRepository;
 import com.filestorage.service.FileService;
 import lombok.extern.slf4j.Slf4j;
-import org.elasticsearch.common.util.iterable.Iterables;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -111,7 +110,7 @@ public class FileServiceImpl implements FileService {
         List<File> result = fileRepository.findAll(PageRequest.of(page, size))
                 .filter(f -> f.getTags().containsAll(tags)).toList();
 
-        log.info("found " + Iterables.size(result) + " files");
+        log.info("found " + result.size() + " files");
 
         return result;
     }
@@ -120,7 +119,7 @@ public class FileServiceImpl implements FileService {
     public List<File> getFiles(int page, int size) {
         List<File> result = fileRepository.findAll(PageRequest.of(page, size)).getContent();
 
-        log.info("found " + Iterables.size(result) + " files");
+        log.info("found " + result.size() + " files");
 
         return result;
     }

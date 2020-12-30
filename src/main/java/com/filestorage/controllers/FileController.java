@@ -28,9 +28,8 @@ public class FileController {
 
     @PostMapping
     public ResponseEntity<?> uploadFile(@RequestBody FileParamsRequest fileParamsRequest) {
-        UploadFileResponse result;
         try {
-            result = new UploadFileResponse(
+            UploadFileResponse result = new UploadFileResponse(
                     fileService.saveFile(
                             File.builder()
                                     .name(fileParamsRequest.getName())
@@ -96,10 +95,10 @@ public class FileController {
 
         if (tags != null) {
             result.setPage(fileService.getFiles(page, size, Arrays.asList(tags)));
-            result.setTotal(Iterables.size(result.getPage()));
+            result.setTotal(result.getPage().size());
         } else {
             result.setPage(fileService.getFiles(page, size));
-            result.setTotal(Iterables.size(result.getPage()));
+            result.setTotal(result.getPage().size());
         }
 
 
