@@ -29,10 +29,10 @@ class FileServiceImplTest {
 
     @Test
     void saveFile() throws InvalidSizeException, IllegalSymbolsException, NullNameException {
-        File file = File.builder().size(5).name("video.mp4").tags(new HashSet<>()).build();
+        File file = File.builder().size(5).name("video.aaa").tags(new HashSet<>()).build();
 
         String id = "newId";
-        File savedFile = File.builder().id(id).size(5).name("video.mp4").tags(new HashSet<>()).build();
+        File savedFile = File.builder().id(id).size(5).name("video.aaa").tags(new HashSet<>()).build();
 
         Mockito.doReturn(savedFile)
                 .when(fileRepository)
@@ -67,6 +67,10 @@ class FileServiceImplTest {
                 .when(fileRepository)
                 .existsById(id);
 
+        Mockito.doNothing()
+                .when(fileRepository)
+                .deleteById(id);
+
         fileService.deleteFile(id);
 
         Mockito.verify(fileRepository, Mockito.times(1)).deleteById(id);
@@ -83,11 +87,11 @@ class FileServiceImplTest {
     public void addTags() throws NoSuchElementException {
         String id = "id";
 
-        File file = File.builder().id(id).size(5).name("video.mp4").tags(new HashSet<>()).build();
+        File file = File.builder().id(id).size(5).name("video.aaa").tags(new HashSet<>()).build();
         Optional<File> optionalFile = Optional.of(file);
 
         String[] tags = new String[]{"tag1", "tag2"};
-        File fileWithTags = File.builder().id(id).size(5).name("video.mp4").tags(Set.of(tags)).build();
+        File fileWithTags = File.builder().id(id).size(5).name("video.aaa").tags(Set.of(tags)).build();
 
         Mockito.doReturn(optionalFile)
                 .when(fileRepository)
@@ -119,7 +123,7 @@ class FileServiceImplTest {
     public void removeTagsNoSuchTags() {
         String id = "id";
         String[] tags = new String[]{"tag1", "tag2"};
-        File file = File.builder().id(id).size(5).name("video.mp4").tags(Set.of(tags)).build();
+        File file = File.builder().id(id).size(5).name("video.aaa").tags(Set.of(tags)).build();
         Optional<File> optionalFile = Optional.of(file);
 
         String[] removingTags = new String[]{"tag"};
@@ -135,9 +139,9 @@ class FileServiceImplTest {
     @Test
     public void getTags(){
         String[] tags = new String[]{"tag1","tag2"};
-        File file1 = File.builder().id("id").size(5).name("video.mp4").tags(Set.of(new String[]{})).build();
-        File file2 = File.builder().id("id1").size(6).name("video2.mp4").tags(Set.of(new String[]{})).build();
-        File file3 = File.builder().id("id2").size(6).name("video3.mp4").tags(Set.of(tags)).build();
+        File file1 = File.builder().id("id").size(5).name("video.aaa").tags(Set.of(new String[]{})).build();
+        File file2 = File.builder().id("id1").size(6).name("video2.aaa").tags(Set.of(new String[]{})).build();
+        File file3 = File.builder().id("id2").size(6).name("video3.aaa").tags(Set.of(tags)).build();
 
 
         List<File> files1 = new ArrayList<>(){
