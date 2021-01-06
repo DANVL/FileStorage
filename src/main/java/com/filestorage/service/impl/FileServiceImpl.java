@@ -1,13 +1,10 @@
 package com.filestorage.service.impl;
 
 import com.filestorage.entities.File;
-import com.filestorage.exceptions.InvalidSizeException;
-import com.filestorage.exceptions.NoSuchElementException;
-import com.filestorage.exceptions.NoSuchTagsException;
-import com.filestorage.exceptions.NullNameException;
+import com.filestorage.exceptions.*;
 import com.filestorage.repository.FileRepository;
 import com.filestorage.service.FileService;
-import com.filestorage.utils.FileTagUtils;
+import com.filestorage.utils.FileNameUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -30,18 +27,29 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public String saveFile(File file) throws InvalidSizeException, NullNameException {
+    public String saveFile(File file) throws InvalidSizeException, NullNameException, IllegalSymbolsException {
         int size = file.getSize();
-        if (size <= 0) {
+
+        if (file.getName() == null) {
+            log.error("File with null name found");
+            throw new NullNameException("Name cannot be null");
+        }
+
+        if (FileNameUtils.isFileNameContainsInvalidCharacters(file.getName())) {
+            log.error("File with illegal characters in name found");
+            throw new IllegalSymbolsException("Name contains illegal characters");
+        }
+
+        if (size < 0) {
             log.error("File with wrong size found");
             throw new InvalidSizeException("Wrong size of " + size + " found");
         }
 
-        if(file.getName() == null){
-            throw new NullNameException("Name cannot be null");
-        }
+        String tag = FileNameUtils.tagByFileName(file.getName());
 
-        file.addTag(FileTagUtils.tagByFileName(file.getName()));
+        if (tag != null) {
+            file.addTag(tag);
+        }
 
         file = fileRepository.save(file);
 
@@ -72,7 +80,7 @@ public class FileServiceImpl implements FileService {
             File edited = file.get();
             Set<String> newTags = edited.getTags();
 
-            if(newTags == null)
+            if (newTags == null)
                 newTags = new HashSet<>();
 
             newTags.addAll(tags);
@@ -119,16 +127,39 @@ public class FileServiceImpl implements FileService {
 
         List<File> result;
 
-        if(tags != null){
-             result = fileRepository
-                    .findAllByNameLikeAndTags(name, Set.of(tags), PageRequest.of(page, size));
-        }else{
-            result = fileRepository
-                    .findAllByNameLike(name, PageRequest.of(page, size));
-        }
+        result = fileRepository
+                .findAllByNameLikeAndTags(name, Set.of(tags), PageRequest.of(page, size));
 
-        log.info("found " + result.size() + " files");
+        log.info("Found " + result.size() + " files");
 
+        return result;
+    }
+
+    @Override
+    public List<File> getFiles(int page, int size, String name) {
+
+        List<File> result;
+
+        result = fileRepository
+                .findAllByNameLike(name, PageRequest.of(page, size));
+
+
+        log.info("Found " + result.size() + " files");
+
+        return result;
+    }
+
+    @Override
+    public long getTotal(String name, String[] tags) {
+        long result = fileRepository.countAllByNameLikeAndTags(name, Set.of(tags));
+        log.info("Total of " + result + " found");
+        return result;
+    }
+
+    @Override
+    public long getTotal(String name) {
+        long result = fileRepository.countAllByNameLike(name);
+        log.info("Total of " + result + " found");
         return result;
     }
 }

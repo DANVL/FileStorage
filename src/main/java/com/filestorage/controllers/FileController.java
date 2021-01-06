@@ -2,10 +2,7 @@ package com.filestorage.controllers;
 
 import com.filestorage.dto.*;
 import com.filestorage.entities.File;
-import com.filestorage.exceptions.InvalidSizeException;
-import com.filestorage.exceptions.NoSuchElementException;
-import com.filestorage.exceptions.NoSuchTagsException;
-import com.filestorage.exceptions.NullNameException;
+import com.filestorage.exceptions.*;
 import com.filestorage.service.FileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashSet;
+import java.util.List;
 
 @RestController
 @RequestMapping("/file")
@@ -38,7 +36,7 @@ public class FileController {
             );
 
             return new ResponseEntity<>(result, HttpStatus.OK);
-        } catch (InvalidSizeException | NullNameException e) {
+        } catch (InvalidSizeException | NullNameException | IllegalSymbolsException e) {
             ErrorResponse error = new ErrorResponse(false, e.getMessage());
             return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
         }
@@ -58,11 +56,11 @@ public class FileController {
     }
 
     @PostMapping("/{id}/tags")
-    public ResponseEntity<?> addTags(@PathVariable String id, @RequestBody TagsRequest tagsRequest) {
+    public ResponseEntity<?> addTags(@PathVariable String id, @RequestBody List<String> tagsRequest) {
 
-        System.out.println(tagsRequest.getTags().size());
+        System.out.println(tagsRequest.size());
         try {
-            fileService.addTags(id, tagsRequest.getTags());
+            fileService.addTags(id, tagsRequest);
             return new ResponseEntity<>(new SuccessResponse(), HttpStatus.OK);
         } catch (NoSuchElementException e) {
             ErrorResponse error = new ErrorResponse(false, "file not found");
@@ -71,10 +69,10 @@ public class FileController {
     }
 
     @DeleteMapping("/{id}/tags")
-    public ResponseEntity<?> removeTags(@PathVariable String id, @RequestBody TagsRequest tagsRequest) {
+    public ResponseEntity<?> removeTags(@PathVariable String id, @RequestBody List<String> tagsRequest) {
 
         try {
-            fileService.removeTags(id, tagsRequest.getTags());
+            fileService.removeTags(id, tagsRequest);
             return new ResponseEntity<>(new SuccessResponse(), HttpStatus.OK);
         } catch (NoSuchElementException e) {
             ErrorResponse error = new ErrorResponse(false, "file not found");
@@ -93,8 +91,13 @@ public class FileController {
                                     @RequestParam(defaultValue = "", required = false) String q) {
         ListFilesResponse result = new ListFilesResponse();
 
-        result.setPage(fileService.getFiles(page, size, q, tags));
-        result.setTotal(result.getPage().size());
+        if (tags != null) {
+            result.setPage(fileService.getFiles(page, size, q, tags));
+            result.setTotal(fileService.getTotal(q, tags));
+        } else {
+            result.setPage(fileService.getFiles(page, size, q));
+            result.setTotal(fileService.getTotal(q));
+        }
 
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
