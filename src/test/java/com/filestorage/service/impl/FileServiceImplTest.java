@@ -5,22 +5,21 @@ import com.filestorage.exceptions.*;
 import com.filestorage.exceptions.NoSuchElementException;
 import com.filestorage.repository.FileRepository;
 import com.filestorage.service.FileService;
-import org.junit.Test;
-
-import  org.junit.Assert;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.*;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest
-public class FileServiceImplTest {
+class FileServiceImplTest {
 
     @Autowired
     FileService fileService;
@@ -29,8 +28,7 @@ public class FileServiceImplTest {
     FileRepository fileRepository;
 
     @Test
-    public void saveFile() throws InvalidSizeException, NullNameException, IllegalSymbolsException {
-
+    void saveFile() throws InvalidSizeException, IllegalSymbolsException, NullNameException {
         File file = File.builder().size(5).name("video.mp4").tags(new HashSet<>()).build();
 
         String id = "newId";
@@ -42,21 +40,23 @@ public class FileServiceImplTest {
 
         String createdId = fileService.saveFile(file);
 
-        Assert.assertEquals(id, createdId);
+        Assertions.assertEquals(id, createdId);
     }
 
-    @Test(expected = InvalidSizeException.class)
-    public void saveFileWrongSize() throws InvalidSizeException, NullNameException, IllegalSymbolsException {
+    @Test
+    public void saveFileWrongSize() {
         File file = File.builder().size(-5).name("aa").build();
 
-        fileService.saveFile(file);
+        Assertions.assertThrows(InvalidSizeException.class, () -> fileService.saveFile(file));
+
     }
 
-    @Test(expected = NullNameException.class)
-    public void saveFileNullName() throws InvalidSizeException, NullNameException, IllegalSymbolsException {
+    @Test
+    public void saveFileNullName() {
         File file = File.builder().size(5).build();
 
-        fileService.saveFile(file);
+        Assertions.assertThrows(NullNameException.class, () -> fileService.saveFile(file));
+
     }
 
     @Test
@@ -72,13 +72,12 @@ public class FileServiceImplTest {
         Mockito.verify(fileRepository, Mockito.times(1)).deleteById(id);
     }
 
-    @Test(expected = NoSuchElementException.class)
-    public void deleteFileException() throws NoSuchElementException {
+    @Test
+    public void deleteFileException() {
         String id = "id";
 
-        fileService.deleteFile(id);
+        Assertions.assertThrows(NoSuchElementException.class, () -> fileService.deleteFile(id));
     }
-
 
     @Test
     public void addTags() throws NoSuchElementException {
@@ -87,7 +86,7 @@ public class FileServiceImplTest {
         File file = File.builder().id(id).size(5).name("video.mp4").tags(new HashSet<>()).build();
         Optional<File> optionalFile = Optional.of(file);
 
-        String[] tags = new String[]{"tag1","tag2"};
+        String[] tags = new String[]{"tag1", "tag2"};
         File fileWithTags = File.builder().id(id).size(5).name("video.mp4").tags(Set.of(tags)).build();
 
         Mockito.doReturn(optionalFile)
@@ -99,27 +98,27 @@ public class FileServiceImplTest {
         Mockito.verify(fileRepository, Mockito.times(1)).save(fileWithTags);
     }
 
-    @Test(expected = NoSuchElementException.class)
-    public void addTagsException() throws NoSuchElementException {
+    @Test
+    public void addTagsException() {
         String id = "id";
 
-        String[] tags = new String[]{"tag1","tag2"};
+        String[] tags = new String[]{"tag1", "tag2"};
 
-        fileService.addTags(id, Arrays.asList(tags));
+        Assertions.assertThrows(NoSuchElementException.class, () -> fileService.addTags(id, Arrays.asList(tags)));
     }
 
-    @Test(expected = NoSuchElementException.class)
-    public void removeTagsNoSuchElement() throws NoSuchElementException, NoSuchTagsException {
+    @Test
+    public void removeTagsNoSuchElement() {
         String id = "id";
-        String[] tags = new String[]{"tag1","tag2"};
+        String[] tags = new String[]{"tag1", "tag2"};
 
-        fileService.removeTags(id,Arrays.asList(tags));
+        Assertions.assertThrows(NoSuchElementException.class, () -> fileService.removeTags(id, Arrays.asList(tags)));
     }
 
-    @Test(expected = NoSuchTagsException.class)
-    public void removeTagsNoSuchTags() throws NoSuchElementException, NoSuchTagsException {
+    @Test
+    public void removeTagsNoSuchTags() {
         String id = "id";
-        String[] tags = new String[]{"tag1","tag2"};
+        String[] tags = new String[]{"tag1", "tag2"};
         File file = File.builder().id(id).size(5).name("video.mp4").tags(Set.of(tags)).build();
         Optional<File> optionalFile = Optional.of(file);
 
@@ -129,7 +128,8 @@ public class FileServiceImplTest {
                 .when(fileRepository)
                 .findById(id);
 
-        fileService.removeTags(id,Arrays.asList(removingTags));
+        Assertions.assertThrows(NoSuchTagsException.class,
+                () -> fileService.removeTags(id, Arrays.asList(removingTags)));
     }
 
     @Test
@@ -140,12 +140,12 @@ public class FileServiceImplTest {
         File file3 = File.builder().id("id2").size(6).name("video3.mp4").tags(Set.of(tags)).build();
 
 
-         List<File> files1 = new ArrayList<>(){
-             {
-                 add(file1);
-                 add(file2);
-             }
-         };
+        List<File> files1 = new ArrayList<>(){
+            {
+                add(file1);
+                add(file2);
+            }
+        };
 
         List<File> files2 = new ArrayList<>(){
             {
@@ -162,16 +162,12 @@ public class FileServiceImplTest {
                 .when(fileRepository)
                 .findAllByNameLikeAndTags("vid", Set.of(tags), PageRequest.of(0,10));
 
-        List<File> result1 = fileService.getFiles(0,10,"vid", null);
+        List<File> result1 = fileService.getFiles(0,10,"vid");
         List<File> result2 = fileService.getFiles(0,10,"vid", tags);
 
-        Assert.assertEquals(result1.size(), 2);
-        Assert.assertEquals(result2.size(), 1);
+        Assertions.assertEquals(result1.size(), 2);
+        Assertions.assertEquals(result2.size(), 1);
 
 
     }
-
-
-
-
 }
